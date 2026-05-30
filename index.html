@@ -18,7 +18,7 @@
             background-color: #000000;
         }
 
-        /* Forces camera view to stretch to 100% of the mobile viewport */
+        /* Forces the camera view canvas to stretch correctly without crashing */
         video, .a-canvas {
             width: 100vw !important;
             height: 100vh !important;
@@ -28,7 +28,36 @@
             object-fit: cover !important;
         }
 
-        /* Modern overlay interface */
+        /* Full Screen Gatekeeper Screen to trigger mobile camera permissions safely */
+        #splash-screen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #111111;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .start-btn {
+            background: #E63946;
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(230, 57, 70, 0.4);
+            margin-top: 20px;
+        }
+
+        /* Bottom UI Menu Overlay Details */
         .biz-overlay {
             position: fixed;
             bottom: 30px;
@@ -44,39 +73,23 @@
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
             text-align: center;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: none; /* Hidden until user taps start */
         }
 
-        .menu-title {
-            margin: 0 0 4px 0;
-            font-size: 20px;
-            font-weight: 700;
-            color: #111111;
-        }
-
-        .menu-subtitle {
-            margin: 0 0 16px 0;
-            color: #666666;
-            font-size: 13px;
-            line-height: 1.4;
-        }
-
-        .order-btn {
-            background: #E63946;
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
-        }
+        .menu-title { font-size: 20px; font-weight: 700; color: #111111; margin-bottom: 4px; }
+        .menu-subtitle { color: #666666; font-size: 13px; margin-bottom: 16px; }
+        .order-btn { background: #E63946; color: white; border: none; width: 100%; padding: 14px; border-radius: 12px; font-size: 16px; font-weight: 600; }
     </style>
 </head>
 <body>
 
-    <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/examples/image-tracking/assets/card-example/card.mind; loadingScreen: #none" 
+    <div id="splash-screen">
+        <h2 style="margin:0;">BiteTour Augmented Reality</h2>
+        <p style="color:#aaa; font-size:14px; margin: 10px 0 0 0;">Tap below to initialize your interactive camera viewer</p>
+        <button class="start-btn" id="start-ar-button">Open AR Menu</button>
+    </div>
+
+    <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/examples/image-tracking/assets/card-example/card.mind; autoStart: false; loadingScreen: #none;" 
              embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true" 
              vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
         
@@ -93,11 +106,31 @@
         </a-entity>
     </a-scene>
 
-    <div class="biz-overlay">
+    <div class="biz-overlay" id="menu-overlay">
         <div class="menu-title">BiteTour AR Menu</div>
-        <div class="menu-subtitle">Point your camera at the blue SoftMIND card to view the 3D asset.</div>
-        <button class="order-btn" onclick="alert('Order sent to the kitchen!')">Order Now</button>
+        <div class="menu-subtitle">Point camera lens at the blue SoftMIND card to see the 3D model.</div>
+        <button class="order-btn" onclick="alert('Order received!')">Order Now</button>
     </div>
+
+    <script>
+        // Safely starts the camera feed only upon direct user gesture input
+        document.getElementById('start-ar-button').addEventListener('click', () => {
+            const sceneEl = document.querySelector('a-scene');
+            const arSystem = sceneEl.systems['mindar-image-system'];
+            
+            // Fade out splash screen wrapper
+            document.getElementById('splash-screen').style.display = 'none';
+            document.getElementById('menu-overlay').style.display = 'block';
+            
+            // Force bootstrap the WebAR camera feed hardware stream safely
+            arSystem.start(); 
+
+            // Kick off standard viewport sizing adjustment
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 500);
+        });
+    </script>
 
 </body>
 </html>
