@@ -4,19 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <title>BiteTour AR Menu</title>
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+
     <style>
-        html, body { 
-            margin: 0; 
+        html, body {
+            margin: 0;
             padding: 0;
-            width: 100%; 
-            height: 100%; 
-            overflow: hidden; 
-            background-color: #000;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000000;
         }
-        /* Hard-forces the tracking camera canvas to occupy full viewport real-estate */
-        .a-canvas, video, .a-enter-vr {
+
+        /* Hard-force full viewport rendering across all mobile device browsers */
+        video, .a-canvas {
             width: 100vw !important;
             height: 100vh !important;
             top: 0 !important;
@@ -24,52 +27,92 @@
             position: absolute !important;
             object-fit: cover !important;
         }
+
+        /* Clean, high-conversion restaurant UI card overlay */
         .biz-overlay {
             position: fixed;
-            bottom: 24px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 999;
-            background: white;
-            padding: 16px;
-            border-radius: 16px;
-            width: 80%;
-            max-width: 300px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            z-index: 9999;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 20px;
+            width: 85%;
+            max-width: 320px;
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
             text-align: center;
-            font-family: sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
+
+        .menu-title {
+            margin: 0 0 4px 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: #111111;
+        }
+
+        .menu-subtitle {
+            margin: 0 0 16px 0;
+            color: #666666;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
         .order-btn {
             background: #E63946;
             color: white;
             border: none;
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
-            margin-top: 8px;
+            transition: background 0.2s ease;
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+        }
+
+        .order-btn:active {
+            background: #b82d38;
         }
     </style>
 </head>
 <body>
 
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;" vr-mode-ui="enabled: false">
+    <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/examples/image-tracking/assets/card-example/card.mind; autoStart: true; loadingScreen: #none" 
+             embedded color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights: true" 
+             vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
         
-        <a-marker preset="hiro">
-            <a-box position="0 0.5 0" material="color: #00b4d8; opacity: 0.9;"
-                   animation="property: rotation; to: 0 360 0; loop: true; dur: 4000">
-            </a-box>
-        </a-marker>
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <a-entity camera></a-entity>
+        <a-light type="ambient" intensity="0.8"></a-light>
+        <a-light type="directional" position="2 4 3" intensity="0.8"></a-light>
+
+        <a-entity mindar-image-target="targetIndex: 0">
+            <a-cylinder position="0 0 0" rotation="90 0 0" radius="0.4" height="0.15" color="#00b4d8"
+                        material="roughness: 0.2; metalness: 0.5;"
+                        animation="property: rotation; to: 90 360 0; loop: true; dur: 6000; easing: linear">
+            </a-cylinder>
+        </a-entity>
     </a-scene>
 
     <div class="biz-overlay">
-        <h3 style="margin: 0;">Gourmet AR Menu</h3>
-        <p style="margin: 5px 0; color: #666; font-size: 14px;">Point your camera at the HIRO marker</p>
-        <button class="order-btn" onclick="alert('Item added to cart!')">Order Now</button>
+        <div class="menu-title">BiteTour AR Menu</div>
+        <div class="menu-subtitle">Scan the blue SoftMIND business card image to see the 3D menu asset.</div>
+        <button class="order-btn" onclick="alert('Success! Your order has been dispatched to the kitchen.')">Order Now</button>
     </div>
+
+    <script>
+        // Critical Force-Resize Fix: Overrides mobile canvas layout initialization delays 
+        // to completely eliminate frozen black frames or half-white spaces.
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(function() {
+                window.dispatchEvent(new Event('resize'));
+            }, 800);
+        });
+    </script>
 
 </body>
 </html>
